@@ -1,12 +1,15 @@
 import {
-  injectAsync, TestComponentBuilder, inject
+  inject, TestComponentBuilder,
   beforeEachProviders, beforeEach,
   iit, it, xit,
   describe, ddescribe, xdescribe
   expect
 } from 'angular2/testing';
-import {Component, View, Renderer, provide, NgIf, NgFor, NgSwitch, NgSwitchWhen, NgSwitchDefault} from 'angular2/angular2';
-import {ReactNativeRenderer} from '../src/react_native_renderer.ts';
+import {Component, View, Renderer, provide} from 'angular2/core';
+import {NgIf, NgFor, NgSwitch, NgSwitchWhen, NgSwitchDefault} from 'angular2/common';
+import {ElementSchemaRegistry} from 'angular2/src/compiler/schema/element_schema_registry';
+import {ReactNativeRenderer, ReactNativeElementSchemaRegistry, REACT_NATIVE_WRAPPER} from '../src/react_native_renderer';
+import {MockReactNativeWrapper} from "./mock_react_native_wrapper";
 
 var result: Object;
 
@@ -16,25 +19,28 @@ describe('ReactNativeRenderer', () => {
     result = {};
   });
   beforeEachProviders(() => [
+    provide(REACT_NATIVE_WRAPPER, {useValue: new MockReactNativeWrapper()}),
+    ReactNativeElementSchemaRegistry,
+    provide(ElementSchemaRegistry, {useExisting: ReactNativeElementSchemaRegistry}),
     ReactNativeRenderer,
     provide(Renderer, {useExisting: ReactNativeRenderer})
   ]);
 
 
-  it('should render text', injectAsync([TestComponentBuilder], (tcb) => {
-    return tcb.overrideTemplate(TestComponent, `foo`)
-      .createAsync(TestComponent).then(() => {
-        expect(result.richText).toEqual('foo');
+  it('should fail', inject([TestComponentBuilder], (tcb: TestComponentBuilder) => {
+    tcb.createAsync(TestComponent).then((fixture) => {
+        fixture.detectChanges();
+        expect(1).toEqual(2);
       });
   }));
 
-  it('should render element', injectAsync([TestComponentBuilder], (tcb) => {
+  /*it('should render element', injectAsync([TestComponentBuilder], (tcb) => {
     return tcb.overrideTemplate(TestComponent, `<a>foo</a>`)
       .createAsync(TestComponent).then(() => {
         expect(result.richText).toEqual('<a>foo</a>');
       });
   }));
-
+ 
   it('should render element with attributes', injectAsync([TestComponentBuilder], (tcb) => {
     return tcb.overrideTemplate(TestComponent, `<a c="d" e="f">foo</a>`)
       .createAsync(TestComponent).then(() => {
@@ -125,31 +131,14 @@ describe('ReactNativeRenderer', () => {
         fixture.detectChanges();
         expect(result.richText).toEqual('-0<b>b</b>1<a>a</a>2-');
       });
-  }));
+  }));*/
 
 });
 
-@Component({
-  selector: 'sub',
-  template: `sub`
-})
-class SubComponent {
-}
-@Component({
-  selector: 'proj',
-  template: `0<ng-content select="b"></ng-content>1<ng-content></ng-content>2`
-})
-class SubComponentWithProjection {
-}
+
 @Component({
   selector: 'test-cmp',
-  template: `to be overriden`,
-  directives: [SubComponent, SubComponentWithProjection, NgIf, NgFor, NgSwitch, NgSwitchWhen, NgSwitchDefault]
+  template: `<Text>foo</Text>`
 })
 class TestComponent {
-  s: string = 'bar';
-  b: boolean = true;
-  a: Array<number> = [1,2,3];
-  d: Array<Object> = [{a:0,b:1}, {a:8, b:9}]
-  n: number = 0;
 }

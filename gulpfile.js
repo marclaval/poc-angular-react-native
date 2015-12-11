@@ -2,9 +2,7 @@ var gulp = require('gulp');
 var typescript = require('gulp-typescript');
 var watch = require('gulp-watch');
 var exec = require('child_process').exec;
-var spawn = require('child_process').spawn;
 var fork = require('child_process').fork;
-var karma = require('karma').Server;
 var path = require('path');
 var runSequence = require('run-sequence');
 var through2 = require('through2');
@@ -89,7 +87,7 @@ gulp.task('transformTests', ['ts2commonjs'], function() {
 });
 
 var treatTestErrorsAsFatal = true;
-gulp.task('test.node/ci', ['transformTests'], function(done) {
+gulp.task('test.node/ci', function(done) {
   runJasmine([PATHS.destination + '/test/**/*_spec.js'], done);
 });
 
@@ -104,44 +102,6 @@ gulp.task('test.node', ['transformTests'], function(neverDone) {
     }
   );
 });
-
-/**********************************************************************************/
-/*******************************   BROWSER   **************************************/
-/**********************************************************************************/
-gulp.task('ts2system', ['clean.code'], function () {
-  ts2js(PATHS.sources.sample, PATHS.destination + '/sample', true);
-  ts2js(PATHS.sources.test, PATHS.destination + '/test', true, true);
-  return ts2js(PATHS.sources.src, PATHS.destination + '/src', true);
-});
-
-gulp.task('karma-launch', function() {
-  new karma({
-    configFile: path.join(__dirname, 'karma.conf.js')
-  }).start();
-});
-
-gulp.task('karma-run', function (done) {
-  runKarma('karma.conf.js', done);
-});
-
-gulp.task('test.browser', ['ts2system'], function (neverDone) {
-  runSequence(
-    'karma-launch',
-    function() {
-      watch([PATHS.sources.src, PATHS.sources.test], function() {
-        runSequence('ts2system', 'karma-run');
-      });
-    }
-  );
-});
-
-gulp.task('test.browser/ci', ['ts2system'], function(done) {
-  new karma({
-    configFile: path.join(__dirname, 'karma.conf.js'),
-    singleRun: true
-  }, done).start();
-});
-
 
 /**********************************************************************************/
 /*******************************    UTIL     **************************************/
@@ -167,17 +127,6 @@ function ts2js(path, dest, toSystem, isSilent) {
   return tsResult.js.pipe(gulp.dest(dest));
 }
 
-function runKarma(configFile, done) {
-  var cmd = process.platform === 'win32' ? 'node_modules\\.bin\\karma run ' :
-    'node node_modules/.bin/karma run ';
-  cmd += configFile;
-  exec(cmd, function(e, stdout) {
-    // ignore errors, we don't want to fail the build in the interactive (non-ci) mode
-    // karma server will print all test failures
-    done();
-  });
-}
-
 function runJasmine(globs, done) {
   var args = ['--'].concat(globs);
   fork('./jasmine-test-shim', args, {stdio: 'inherit'})
@@ -196,17 +145,10 @@ function runJasmine(globs, done) {
 
 function transformCommonJSTests() {
   return through2.obj(function (file, encoding, done) {
-    var content = `var parse5Adapter = require('angular2/src/core/dom/parse5_adapter');\r\n` +
+    var content = `var parse5Adapter = require('angular2/src/platform/server/parse5_adapter');\r\n` +
       `parse5Adapter.Parse5DomAdapter.makeCurrent();\r\n` + String(file.contents);
     file.contents = new Buffer(content);
     this.push(file);
     done();
   });
-}
-
-function afterRender(error, stdout, stderr, done) {
-  if (stdout) console.log('stdout: ' + stdout);
-  if (stderr) console.log('stderr: ' + stderr);
-  if (error)  console.log('exec error: ' + error);
-  if (done) done();
 }
