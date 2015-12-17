@@ -1,4 +1,4 @@
 import {bootstrapReactNative} from './bootstrap';
-import {TodoMVC} from "./todomvc";
+import {HelloApp} from "./hello";
 
-bootstrapReactNative('ngReactNative', TodoMVC);
+bootstrapReactNative('ngReactNative', HelloApp);

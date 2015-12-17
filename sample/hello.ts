@@ -27,7 +27,7 @@ class Sub {}
         <Text [style]="styles.instructions">
           To get started, edit hello.ts
         </Text>
-        <Text [style]="styles.instructions" [fontSize]="s">
+        <Text [style]="styles.instructions" [fontSize]="s" (swipe)="handleEvent($event)">
           Shake or press menu button for dev menu {{foo}}
         </Text>
         <Text *ngIf="maybe" [style]="styles.row">ngIf says hello</Text>
