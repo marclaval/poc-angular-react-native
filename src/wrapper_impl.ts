@@ -58,11 +58,11 @@ export class ReactNativeWrapperImpl extends ReactNativeWrapper {
   }
 
   manageChildren(parentTag: number, moveFrom: Array<number>, moveTo: Array<number>, addTags: Array<number>, addAt: Array<number>, removeAt: Array<number>) {
+    this.$log(`Managing children of ${parentTag}:`, moveFrom, moveTo, addTags, addAt, removeAt);
     UIManager.manageChildren(parentTag, moveFrom, moveTo, addTags, addAt, removeAt);
   }
 
   dispatchCommand(tag: number, command: string, params: any = null) {
-    //TODO: generalize
     var commands: {[s: string]: number} = {
       'blurTextInput': UIManager.AndroidTextInput.Commands.blurTextInput,
       'focusTextInput': UIManager.AndroidTextInput.Commands.focusTextInput,
@@ -72,6 +72,7 @@ export class ReactNativeWrapperImpl extends ReactNativeWrapper {
       'setPressed': UIManager.RCTView.Commands.setPressed
 
     };
+    this.$log(`Dispatching command to ${tag}: ${command} with ${params}`);
     UIManager.dispatchViewManagerCommand(tag, commands[command], params);
   }
 

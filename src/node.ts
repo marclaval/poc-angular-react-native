@@ -1,4 +1,5 @@
 import {ReactNativeWrapper} from './wrapper';
+import {NgZone} from 'angular2/core';
 import {Hammer} from './hammer';
 
 export var nodeMap: Map<number, Node> = new Map<number, Node>();
@@ -14,46 +15,14 @@ export abstract class Node {
   public properties: {[s: string]: any } = {};
 
   public nativeTag: number = -1;
-  private _created: boolean = false;
-  public rnWrapper: ReactNativeWrapper = null;
+  public isCreated: boolean = false;
 
-  constructor(wrapper: ReactNativeWrapper) {
-    this.rnWrapper = wrapper;
-  }
+  constructor(public rnWrapper: ReactNativeWrapper, public zone: NgZone) {}
 
-  createNative() {
-    if (!this._created) {
-      this.nativeTag = this.rnWrapper.createView(this.tagName, 1, this._buildProps());
-      this._created = true;
-      nodeMap.set(this.nativeTag, this);
-    }
-  }
-
-  createNativeRecursively() {
-    if (!this._created) {
-      this instanceof TextNode ? (<TextNode>this).createNativeText() : this.createNative();
-      for (var i = 0; i < this.children.length; i++) {
-        var child = this.children[i];
-        child.createNativeRecursively();
-        child.attachToParent();
-      }
-    }
-  }
-
-  attachToParent() {
-    if (this.nativeTag > -1) {
-      var parent = this.parent;
-      this.rnWrapper.$log(`Attaching to ${parent.nativeTag}: ${this.nativeTag} at ${parent.nativeChildren.length}`);
-      this.rnWrapper.manageChildren(parent.nativeTag, null, null, [this.nativeTag], [parent.nativeChildren.length], null);
-      parent.nativeChildren.push(this.nativeTag);
-    }
-  }
-
-  insertAfter(nodes: Array<Node>) {
-    if (nodes.length > 0 && this.parent) {
+  getInsertionNativeIndex(): number {
+    var nativeIndex = -1;
+    if (this.parent) {
       var index = this.parent.children.indexOf(this);
-      var nativeIndex = -1;
-      var nativeInsertedCount = 0;
       var count = index;
       while (count >= 0) {
         var prev = this.parent.children[count];
@@ -63,62 +32,22 @@ export abstract class Node {
         }
         count--;
       }
-      for (var i = 0; i < nodes.length; i++) {
-        var node = nodes[i];
-        node.createNativeRecursively();
-        this.parent.children.splice(index + i + 1, 0, node);
-        node.parent = this.parent;
-        if (node.nativeTag > -1) {
-          this.rnWrapper.$log(`Attaching to ${node.parent.nativeTag}: ${node.nativeTag} at ${nativeIndex + nativeInsertedCount + 1}`);
-          this.rnWrapper.manageChildren(node.parent.nativeTag, null, null, [node.nativeTag], [nativeIndex + nativeInsertedCount + 1], null);
-          node.parent.nativeChildren.splice(nativeIndex + nativeInsertedCount + 1, 0, node.nativeTag);
-          nativeInsertedCount++;
-        }
-      }
     }
+    return nativeIndex + 1;
   }
 
-  detach() {
-    var index = this.parent.children.indexOf(this);
-    this.parent.children.splice(index, 1);
-    if (this.nativeTag > -1) {
-      var nativeIndex = this.parent.nativeChildren.indexOf(this.nativeTag);
-      this.parent.nativeChildren.splice(nativeIndex, 1);
-      this.rnWrapper.$log(`Removing from ${this.parent.nativeTag}: ${this.nativeTag} at ${nativeIndex}`)
-      this.rnWrapper.manageChildren(this.parent.nativeTag, null, null, null, null, [nativeIndex]);
-      this._destroyNative();
-    }
-  }
-
-  _destroyNative() {
-    this._created = false;
+  destroyNative() {
+    this.isCreated = false;
     nodeMap.delete(this.nativeTag);
     this.nativeTag = -1;
     this.nativeChildren = [];
     for (var i = 0; i < this.children.length; i++) {
-      this.children[i]._destroyNative();
+      this.children[i].destroyNative();
     }
   }
 
   setProperty(name: string, value: any) {
     this.properties[name] = value;
-    this.rnWrapper.updateView(this.nativeTag, this.tagName, this._buildProps());
-  }
-
-  _buildProps(): Object {
-    if (this.properties.hasOwnProperty('style')) {
-      var computedStyle: { [s: string]: any } = {};
-      try {
-        computedStyle = this.rnWrapper.computeStyle(this.properties['style']);
-      } catch (e) {
-        console.error(e);
-      }
-      for (var key in computedStyle) {
-        this.properties[key] = computedStyle[key];
-      }
-      delete this.properties['style'];
-    }
-    return this.properties;
   }
 
   addEventListener(eventName: string, handler: Function) {
@@ -157,7 +86,9 @@ export abstract class Node {
     event.currentTarget = this;
     var handlers = this.eventListeners.get(name);
     if (handlers) {
-      handlers.forEach((handler) => {handler(event)});
+      handlers.forEach((handler) => {
+        this.zone.run(() => handler(event));
+      });
     }
     if (this.parent && !event._stop) {
       this.parent.fireEvent(name, event);
@@ -166,10 +97,10 @@ export abstract class Node {
 
   //TODO: generalize this TextInput specific code
   focus() {
-    this.rnWrapper.dispatchCommand(this.nativeTag, 'focusTextInput');
+    this.rnWrapper.dispatchCommand(this.nativeTag, 'focusTextInput', null);
   }
   blur() {
-    this.rnWrapper.dispatchCommand(this.nativeTag, 'blurTextInput');
+    this.rnWrapper.dispatchCommand(this.nativeTag, 'blurTextInput', null);
   }
 
   dispatchCommand(command: string, params: any = null) {
@@ -187,67 +118,34 @@ export abstract class Node {
   }
 }
 
-export class ComponentNode extends Node {
-  private contentNodesByNgContentIndex: Node[][] = [];
-
-  constructor(public tagName: string, public isBound: boolean, _attribs: { [s: string]: string }, public isRoot: boolean, wrapper: ReactNativeWrapper) {
-    super(wrapper);
-    for (var i in _attribs) {
-      this.properties[i] = _attribs[i];
-    }
-    this.createNative();
-  }
-
-  attachRoot() {
-    this.rnWrapper.$log(`Attaching root ${this.nativeTag}`);
-    this.rnWrapper.manageChildren(1, null, null, [this.nativeTag], [0], null);
-  }
-
-  addContentNode(ngContentIndex: number, node: Node) {
-    while (this.contentNodesByNgContentIndex.length <= ngContentIndex) {
-      this.contentNodesByNgContentIndex.push([]);
-    }
-    this.contentNodesByNgContentIndex[ngContentIndex].push(node);
-  }
-
-  project(ngContentIndex: number): Node[] {
-    return ngContentIndex < this.contentNodesByNgContentIndex.length ?
-      this.contentNodesByNgContentIndex[ngContentIndex] :
-      [];
-  }
-}
-
 export class ElementNode extends Node {
-  constructor(public tagName: string, public isBound: boolean, _attribs: { [s: string]: string }, wrapper: ReactNativeWrapper) {
-    super(wrapper);
+  constructor(public tagName: string, public isBound: boolean, _attribs: { [s: string]: string }, wrapper: ReactNativeWrapper, zone: NgZone) {
+    super(wrapper, zone);
     for (var i in _attribs) {
       this.properties[i] = _attribs[i];
     }
-    this.createNative();
   }
 }
 
 export class TextNode extends Node {
-  constructor(public value: string,  public isBound: boolean, wrapper: ReactNativeWrapper) {
-    super(wrapper);
-    this.createNativeText();
-  }
-
-  createNativeText() {
-    if (this.isBound || !/^(\s|\r\n|\n|\r)+$/.test(this.value)) {
+  constructor(public value: string, wrapper: ReactNativeWrapper, zone: NgZone) {
+    super(wrapper, zone);
+    if (!/^(\s|\r\n|\n|\r)+$/.test(this.value)) {
       this.properties = {'text': this.value ? this.value.trim() : ''};
       this.tagName = 'RawText';
-      this.createNative();
     }
   }
 
   setText(text: string) {
-    this.value = text ? text.trim() : '';
+    this.value = text;
     this.setProperty('text', this.value);
   }
 }
 
 export class AnchorNode extends Node {
-  constructor(wrapper: ReactNativeWrapper) { super(wrapper);}
-  createNative() {}
+  constructor(wrapper: ReactNativeWrapper, zone: NgZone) { super(wrapper, zone);}
+}
+
+export class InertNode extends Node {
+  constructor(wrapper: ReactNativeWrapper, zone: NgZone) { super(wrapper, zone);}
 }
