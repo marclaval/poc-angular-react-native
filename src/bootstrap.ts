@@ -20,9 +20,11 @@ apply();
 
 // Finally, define the bootstrap
 import {RootRenderer, Renderer, provide, NgZone, Provider, enableProdMode} from 'angular2/core';
+import {XHRBackend} from 'angular2/http';
 import {bootstrap} from 'angular2/bootstrap';
 import {ElementSchemaRegistry} from 'angular2/src/compiler/schema/element_schema_registry';
 import {ReactNativeRootRenderer, ReactNativeRootRenderer_, ReactNativeElementSchemaRegistry, REACT_NATIVE_WRAPPER} from './react_native_renderer';
+import {ReactNativeXHRBackend} from './xhr_backend';
 
 export function bootstrapReactNative(appName:string, cpt: any) {
   ReactNativeWrapperImpl.registerApp(appName, function() {
