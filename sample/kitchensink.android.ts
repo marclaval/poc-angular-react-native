@@ -10,12 +10,13 @@ import {WidgetsList} from "./widgets";
 import {WebViewApp} from './webview';
 import {APIsList} from "./apis";
 import {HttpApp} from "./http";
+import {RouterApp} from "./router";
 import {NativeFeedback} from "./common";
 
 @Component({
   selector: 'kitchensink-app',
   host: {position: 'absolute', top: '0', left: '0', bottom: '0', right: '0'},
-  directives: [NgSwitch, NgSwitchWhen, NativeFeedback, HelloApp, TodoMVC, GesturesApp, WidgetsList, WebViewApp, APIsList, HttpApp],
+  directives: [NgSwitch, NgSwitchWhen, NativeFeedback, HelloApp, TodoMVC, GesturesApp, WidgetsList, WebViewApp, APIsList, HttpApp, RouterApp],
   template: `
 <DrawerLayout drawerWidth="300" drawerPosition="8388611" flex="1">
   <View position="absolute" top="0" left="0" right="0" bottom="0" collapsable="false">
@@ -28,6 +29,7 @@ import {NativeFeedback} from "./common";
       <webview-app *ngSwitchWhen="4"></webview-app>
       <apis-list *ngSwitchWhen="5"></apis-list>
       <http-app *ngSwitchWhen="6"></http-app>
+      <router-app *ngSwitchWhen="7"></router-app>
     </View>
   </View>
   <View position="absolute" top="0" bottom="0" width="300" collapsable="false">
@@ -52,6 +54,9 @@ import {NativeFeedback} from "./common";
       </View>
       <View [style]="styles.menuItem" (tap)="switchContent(6)" nativeFeedback="#00a9e0">
         <Text [style]="styles.menuText">Http</Text>
+      </View>
+      <View [style]="styles.menuItem" (tap)="switchContent(7)" nativeFeedback="#00a9e0">
+        <Text [style]="styles.menuText">Router</Text>
       </View>
     </View>
   </View>

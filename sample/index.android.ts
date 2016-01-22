@@ -1,4 +1,4 @@
 import {bootstrapReactNative} from './bootstrap';
-import {KitchenSinkApp} from "./kitchensink.android";
+import {RouterApp} from "./router";
 
-bootstrapReactNative('ngReactNative', KitchenSinkApp);
+bootstrapReactNative('ngReactNative', RouterApp);
