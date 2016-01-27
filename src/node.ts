@@ -64,8 +64,15 @@ export abstract class Node {
     if (updateNative && this.nativeTag > -1) {
       var prop = {};
       prop[name] = value;
-      this.rnWrapper.updateView(this.nativeTag, this.tagName, prop);
+
     }
+  }
+
+  setProperties(properties:  {[s: string]: any }) {
+    for (var propName in properties) {
+      this.properties[propName] = properties[propName];
+    }
+    this.rnWrapper.updateView(this.nativeTag, this.tagName, properties);
   }
 
   addEventListener(eventName: string, handler: Function) {
