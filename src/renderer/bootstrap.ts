@@ -26,7 +26,7 @@ apply();
 import {RootRenderer, Renderer, provide, NgZone, Provider, enableProdMode} from 'angular2/core';
 import {bootstrap} from 'angular2/bootstrap';
 import {ElementSchemaRegistry} from 'angular2/src/compiler/schema/element_schema_registry';
-import {ReactNativeRootRenderer, ReactNativeRootRenderer_, ReactNativeElementSchemaRegistry, REACT_NATIVE_WRAPPER} from './react_native_renderer';
+import {ReactNativeRootRenderer, ReactNativeRootRenderer_, ReactNativeElementSchemaRegistry, REACT_NATIVE_WRAPPER} from './renderer';
 import {HTTP_PROVIDERS} from './../http/xhr_backend';
 import {ROUTER_PROVIDERS, LocationStrategy} from 'angular2/router';
 import {ReactNativeLocationStrategy} from "./../router/location_strategy";

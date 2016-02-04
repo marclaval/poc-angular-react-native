@@ -11,6 +11,8 @@ var ReactNativeAttributePayload = require('ReactNativeAttributePayload');
 var ReactNativeViewAttributes = require('ReactNativeViewAttributes');
 
 const RCT_VIEW_NAMES: { [s: string]: string } = {
+  'native-view': 'RCTView',
+
   "DropdownPicker": "AndroidDropdownPicker",
   "DialogPicker": "AndroidDialogPicker",
   "DrawerLayout": "AndroidDrawerLayout",
@@ -27,7 +29,6 @@ const RCT_VIEW_NAMES: { [s: string]: string } = {
   "VirtualText": "RCTVirtualText",
   "TextInput": "AndroidTextInput",
   "Toolbar": "ToolbarAndroid",
-  "View": "RCTView",
   "WebView": "RCTWebView"
 }
 

@@ -241,7 +241,7 @@ function transformAndroidManifest() {
 function customReporter() {
   return {
     error: (error) => {
-      if (error.relativeFilename && error.message.indexOf(`does not exist on type 'NgMatchers'`) == -1) {
+      if (false && error.relativeFilename && error.message.indexOf(`does not exist on type 'NgMatchers'`) == -1) {
         console.error(error.message);
       }
     },

@@ -8,7 +8,7 @@ import {
 import {Component, RootRenderer, provide} from 'angular2/core';
 import {NgIf, NgFor} from 'angular2/common';
 import {ElementSchemaRegistry} from 'angular2/src/compiler/schema/element_schema_registry';
-import {ReactNativeRootRenderer, ReactNativeRootRenderer_, ReactNativeElementSchemaRegistry, REACT_NATIVE_WRAPPER} from '../../src/renderer/react_native_renderer';
+import {ReactNativeRootRenderer, ReactNativeRootRenderer_, ReactNativeElementSchemaRegistry, REACT_NATIVE_WRAPPER} from '../../src/renderer/renderer';
 import {MockReactNativeWrapper} from "./../../src/wrapper/wrapper_mock";
 import {fireEvent} from './../utils';
 import {CustomTestComponentBuilder} from "../../src/testing/test_component_builder";
