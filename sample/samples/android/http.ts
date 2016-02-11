@@ -11,7 +11,7 @@ import {StyleSheet} from 'react-native';
   host: {position: 'absolute', top: '0', left: '0', bottom: '0', right: '0'},
   directives: [NativeFeedback, NgFor],
   template: `
-<TextInput text="" mostRecentEventCount="0" placeholder="Search Wikipedia" (tap)="$event.target.focus()" (topSubmitEditing)="sendXHR($event)"></TextInput>
+<TextInput [autoFocus]="true" placeholder="Search Wikipedia" (submit)="sendXHR($event)"></TextInput>
 <native-text *ngFor="#page of pages">{{page}}</native-text>
 `
 })
@@ -19,9 +19,9 @@ export class HttpApp {
   pages: Array<any> = [];
   constructor(private http: Http) {}
 
-  sendXHR(event: any) {
-    if (event.text && event.text.length > 0) {
-      this.http.get('https://en.wikipedia.org/w/api.php?format=json&action=query&generator=allpages&gaplimit=10&gapfrom=' + event.text)
+  sendXHR(text: string) {
+    if (text && text.length > 0) {
+      this.http.get('https://en.wikipedia.org/w/api.php?format=json&action=query&generator=allpages&gaplimit=10&gapfrom=' + text)
         .map(res => res.json())
         .subscribe(data => {
           this.pages = [];
@@ -31,6 +31,6 @@ export class HttpApp {
           }
         });
     }
-    event.target.blur();
+
   }
 }
