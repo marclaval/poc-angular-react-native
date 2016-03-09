@@ -11,7 +11,10 @@ var ANDROID_BINDINGS: string = `[fadeDuration]="_fadeDuration" [loadingIndicator
 var IOS_BINDINGS: string = `[capInsets]="_capInsets" [defaultSource]="_defaultSource" [source]="_source"`;
 
 //TODO: add iOS specific events (onError, on Progress) and specific cases (tintColor, resizeMode)
-
+/**
+ * Got you intro
+ * on 2 lines
+ */
 @Component({
   selector: 'Image',
   inputs: [
@@ -27,6 +30,9 @@ export class Image extends HighLevelComponent {
   }
 
   //Events
+  /**
+   * Got you output
+   */
   @Output() load: EventEmitter<any> = new EventEmitter();
   @Output() loadStart: EventEmitter<any> = new EventEmitter();
   @Output() loadEnd: EventEmitter<any> = new EventEmitter();
@@ -34,6 +40,9 @@ export class Image extends HighLevelComponent {
   //Properties
   private _resizeMode: string;
   private _source: any;
+  /**
+   * Got you input
+   */
   set resizeMode(value: string) {this._resizeMode = this.processEnum(value, ['cover', 'contain', 'stretch']);}
   set source(value: string) {this._source = this.resolveAssetSource(value);}
 
@@ -62,6 +71,9 @@ export class Image extends HighLevelComponent {
     this.loadStart.emit(null);
   }
 
+  /**
+   * Got you function
+   */
   _handleLoadEnd() {
     this.loadEnd.emit(null);
   }

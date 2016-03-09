@@ -1,5 +1,6 @@
 var gulp = require('gulp');
 var filter = require('gulp-filter');
+var jade = require('gulp-jade');
 var strip = require('gulp-strip-comments');
 var typescript = require('gulp-typescript');
 var watch = require('gulp-watch');
@@ -13,6 +14,7 @@ var through2 = require('through2');
 var APP_NAME = 'ngReactNative';
 var PATHS = {
   sources: {
+    doc: 'doc/pages/**/*.jade',
     src: 'src/**/*.ts',
     sample: 'sample/**/*.ts',
     sampleAssets: 'sample/**/*.png',
@@ -20,6 +22,7 @@ var PATHS = {
   },
   destination: 'dist/code',
   app: 'dist/app',
+  doc: 'dist/doc',
   modules: [
     'node_modules/angular2/**/*',
     'node_modules/es6-shim/**/*',
@@ -169,6 +172,26 @@ gulp.task('test.browser/ci', ['ts2system'], function(done) {
     singleRun: true
   }, done).start();
 });
+
+/**********************************************************************************/
+/*********************************   DOC    ***************************************/
+/**********************************************************************************/
+gulp.task('!doc', function() {
+  var YOUR_LOCALS = {};
+
+  gulp.src(PATHS.sources.doc)
+    .pipe(jade({
+      locals: YOUR_LOCALS
+    }))
+    .pipe(gulp.dest(PATHS.doc))
+});
+
+gulp.task('doc', ['!doc'], function (neverDone) {
+      watch([PATHS.sources.doc], function() {
+        runSequence('!doc');
+      });
+});
+
 
 /**********************************************************************************/
 /*******************************    UTIL     **************************************/
