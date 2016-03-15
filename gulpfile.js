@@ -79,7 +79,9 @@ gulp.task('!launch.ios', ['!compile'], function(done) {
   executeInAppDir('react-native run-ios', done);
 });
 gulp.task('!start.android', ['!launch.android'], function(neverDone) {
-  executeInAppDir('react-native start');
+  if (/^win/.test(process.platform)) {
+    executeInAppDir('react-native start');
+  }
 });
 gulp.task('watch', function(neverDone) {
   watch([PATHS.sources.src, PATHS.sources.sample], function() {
@@ -92,7 +94,7 @@ gulp.task('start.ios', ['!launch.ios', 'watch'], function (neverDone) {
 });
 
 function executeInAppDir(command, done, inParentFolder) {
-  var cmd = 'mkdir dist' + path.sep + 'app';
+  var cmd = 'mkdir -p dist' + path.sep + 'app';
   exec(cmd, function(e, stdout) {
     var dir = './dist/app';
     if (!inParentFolder) dir += '/' + APP_NAME;

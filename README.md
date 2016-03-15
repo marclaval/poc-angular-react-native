@@ -15,8 +15,7 @@ Based on https://github.com/angular/react-native-renderer
 ### Running scripts
 
 Creating the sample project:
-* `gulp init` to create the react-native project  
-*On Mac, run the command twice*
+* `gulp init` to create the react-native project
 *For iOS only, open `.dist/app/ngReactNative/node_modules/reflect-metadata/Reflect.js` and delete `&& require("crypto")` in it.
 
 Android:
