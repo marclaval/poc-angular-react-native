@@ -62,7 +62,7 @@ They support multi-touch by providing a list of <code>touches</code>.</p>
 <li><code>topTouchEnd</code>: fired when all fingers leave the screen.</li>
 <li><code>topTouchCancel</code>: fired when the touch gesture is cancelled, e.g. when a scroll is triggered.</li>
 </ul>
-<p>In a template, it can be used as follows:</p>
+<p>In a template, they can be used as follows:</p>
 <pre><code>&lt;View (topTouchStart)=&quot;_handleStart($event)&quot;&gt;...&lt;/View&gt;
 </code></pre><h2 id="gestures-with-hammer-js">Gestures with Hammer.js</h2>
 <p>Since the raw touch events are very to the ones of a mobile browser, we can use <a href="http://hammerjs.github.io/">Hammer.js</a> to recognize gestures.
